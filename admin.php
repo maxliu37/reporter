@@ -34,6 +34,12 @@ switch ($op) {
         db_show_article($sn);
         break;
 
+    case 'update':
+        # code...
+        $sn = db_update_article($sn);
+        header("location: index.php?sn={$sn}");
+        exit;
+
     default:
         # code...
         break;
@@ -53,6 +59,31 @@ function db_insert_article($db)
     $db->query($sql) or die($db->error);
     $sn = $db->insert_id;
 
+    db_upload_pic($sn);
+
+    return $sn;
+}
+
+
+//update one database article
+function db_update_article($sn)
+{
+    global $db;
+    $title   = $db->real_escape_string($_POST['title']);
+    $content = $db->real_escape_string($_POST['content']);
+    $username = $db->real_escape_string($_POST['username']);
+
+    $sql = "UPDATE `article` SET `title`='{$title}', `content`='{$content}', `update_time`= NOW() WHERE `sn`='{$sn}' and username='{$_SESSION['username']}'";
+    $db->query($sql) or die($db->error);
+
+    db_upload_pic($sn);
+
+    return $sn;
+}
+
+
+//upload pic to database
+function db_upload_pic($sn) {
     if (isset($_FILES)) {
         require_once 'class.upload.php';
         $foo = new Upload($_FILES['pic']);
@@ -73,22 +104,10 @@ function db_insert_article($db)
                 $foo->Process('uploads/');
             }
         }
-
-
-
-    //if (isset($_FILES)) {
-    //    $ext = pathinfo($_FILES['pic']['name'], PATHINFO_EXTENSION);
-    //    if (!is_dir('uploads')) {
-    //        mkdir('uploads');
-    //    }
-    //    move_uploaded_file($_FILES['pic']['tmp_name'], "uploads/{$sn}.{$ext}");
-
     }
-
-    return $sn;
 }
 
-
+//delete one article from database
 function db_delete_article($sn) {
     global $db;
 
