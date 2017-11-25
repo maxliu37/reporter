@@ -113,4 +113,10 @@ function db_delete_article($sn) {
 
 $sql = "DELETE FROM `article` WHERE sn='{$sn}' and username='{$_SESSION['username']}'";
     $db->query($sql) or die($db->error);
+
+    if (file_exists("uploads/cover_{$sn}.png")) {
+        unlink("uploads/cover_{$sn}.png");
+        unlink("uploads/thumb_{$sn}.png");
+    }
+
 }
